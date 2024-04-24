@@ -7,6 +7,7 @@ public class Rifle : MonoBehaviour
     [Header("Parameter")]
     [SerializeField] private Camera _cam;
     [SerializeField] private PlayerController _player;
+    [SerializeField] private Animator _animator;
     [SerializeField] private float _damage = 10.0f;
     [SerializeField] private float _range = 100.0f;
     [SerializeField] private float _reload = 15.0f;
@@ -44,8 +45,29 @@ public class Rifle : MonoBehaviour
 
         if (Input.GetButton("Fire1") && Time.time >= _nextTimeShoot)
         {
+            _animator.SetBool("Fire", true);
+            _animator.SetBool("Idle", false);
             _nextTimeShoot = Time.time + 1.0f / _reload;
             Shoot();
+        }
+        else if (Input.GetButton("Fire1") && Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        {
+            _animator.SetBool("Idle", false);
+            _animator.SetBool("FireWalk", true);
+        }
+        else if (Input.GetButton("Fire1") && Input.GetButton("Fire2"))
+        {
+            _animator.SetBool("Idle", false);
+            _animator.SetBool("IdleAim", true);
+            _animator.SetBool("FireWalk", true);
+            _animator.SetBool("isWalk", true);
+            _animator.SetBool("Reloading", false);
+        }
+        else
+        {
+            _animator.SetBool("Fire", false);
+            _animator.SetBool("Idle", true);
+            _animator.SetBool("FireWalk", false);
         }
     }
 
@@ -80,9 +102,11 @@ public class Rifle : MonoBehaviour
         _player.SetPlayerSpeed();
         _setReloading = true;
         Debug.Log("## Reloading");
+        _animator.SetBool("Reloading", true);
         yield return new WaitForSeconds(_reloadingTime);
-        _player.SetPlayerSpeed(2.0f, 3.0f);
+        _animator.SetBool("Reloading", false);
         _presentAmmunition = _maxAmmo;
+        _player.SetPlayerSpeed(2.0f, 3.0f);
         _setReloading = false;
     }
 }
