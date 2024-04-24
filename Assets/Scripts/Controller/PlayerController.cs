@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Health")]
+    [SerializeField] private float _health = 1000.0f;
+    [SerializeField] private float _presentHealth = 0.0f;
+
+
+    [Space(3)]
     [Header("Movement")] 
     [SerializeField] private float _playerSpeed = 2.0f;
     [SerializeField] private float _currentSpeed = 0.0f;
@@ -33,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        _presentHealth = _health;
     }
 
     private void Update()
@@ -129,6 +136,18 @@ public class PlayerController : MonoBehaviour
         } else {
             _animator.ResetTrigger("Jump");
         }
+    }
+
+    private void Death()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Object.Destroy(gameObject);
+    }
+
+    public void HitDamage(float damage)
+    {
+        _presentHealth -= damage;
+        if (_presentHealth <= 0) Death();
     }
 
     public void SetPlayerSpeed(float speed = 0.0f, float sprintSpeed = 0.0f)

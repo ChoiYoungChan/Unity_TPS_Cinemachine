@@ -21,11 +21,10 @@ public class Rifle : MonoBehaviour
     private int _presentAmmunition;
     private bool _setReloading;
 
-
-
     [Space(3)]
     [Header("Effect")]
     [SerializeField] private ParticleSystem _muzzleFlash;
+    [SerializeField] private GameObject _woodedEffect;
 
     private void Awake()
     {
@@ -43,6 +42,41 @@ public class Rifle : MonoBehaviour
             return;
         }
 
+        FireAnimation();
+    }
+
+    private void Shoot()
+    {
+        if(_mag==0)
+        {
+            // display ammo is empty
+        }
+
+        _presentAmmunition--;
+
+        if(_presentAmmunition == 0)
+        {
+            _mag--;
+        }
+        _muzzleFlash.Play();
+        RaycastHit hit;
+
+        if (Physics.Raycast(_cam.transform.position, _cam.transform.forward, out hit, _range))
+        {
+            Debug.Log("## hit info : " + hit.transform.name);
+            Objects objects = hit.transform.GetComponent<Objects>();
+
+            if (objects != null)
+            {
+                objects.HitDamage(_damage);
+                GameObject woodgo = Instantiate(_woodedEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                Destroy(woodgo, 1.0f);
+            }
+        }
+    }
+
+    private void FireAnimation()
+    {
         if (Input.GetButton("Fire1") && Time.time >= _nextTimeShoot)
         {
             _animator.SetBool("Fire", true);
@@ -68,32 +102,6 @@ public class Rifle : MonoBehaviour
             _animator.SetBool("Fire", false);
             _animator.SetBool("Idle", true);
             _animator.SetBool("FireWalk", false);
-        }
-    }
-
-    private void Shoot()
-    {
-        RaycastHit hit;
-        _muzzleFlash.Play();
-
-        if(_mag==0)
-        {
-            // display ammo is empty
-        }
-
-        _presentAmmunition--;
-
-        if(_presentAmmunition == 0)
-        {
-            _mag--;
-        }
-
-        if (Physics.Raycast(_cam.transform.position, _cam.transform.forward, out hit, _range))
-        {
-            Debug.Log("## hit info : " + hit.transform.name);
-            Objects objects = hit.transform.GetComponent<Objects>();
-
-            if (objects != null) objects.HitDamage(_damage);
         }
     }
 
