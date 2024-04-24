@@ -27,8 +27,13 @@ public class PlayerController : MonoBehaviour
     private bool onSurface;
 
     [Space(3)]
-    [Header("Camera")]
+    [Header("Objects")]
     [SerializeField] private Transform _camera;
+
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     private void Update()
     {
@@ -57,8 +62,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalAxis, 0.0f, verticalAxis).normalized;
         var value = direction.magnitude >= 0.1f;
-        if (value)
-        {
+        if (value) {
             _animator.SetBool("isWalk", value);
             _animator.SetBool("isRun", !value);
             _animator.SetBool("Idle", !value);
@@ -66,17 +70,9 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool("AimWalk", !value);
             _animator.SetBool("IdleAim", !value);
 
-
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref _turnCalmVelocity, _turnCalmTime);
-            this.transform.rotation = Quaternion.Euler(0.0f, angle, 0.0f);
-
-            Vector3 moveDir = Quaternion.Euler(0.0f, targetAngle, 0.0f) * Vector3.forward;
-            _controller.Move(moveDir.normalized * _playerSpeed * Time.deltaTime);
+            Move(direction, _playerSpeed);
             _currentSpeed = _playerSpeed;
-        }
-        else
-        {
+        } else {
             _animator.SetBool("Idle", !value);
             _animator.SetTrigger("Jump");
             _animator.SetBool("isWalk", value);
@@ -97,19 +93,13 @@ public class PlayerController : MonoBehaviour
             Vector3 direction = new Vector3(horizontalAxis, 0.0f, verticalAxis).normalized;
             var value = direction.magnitude >= 0.1f;
 
-            if (value)
-            {
+            if (value) {
                 _animator.SetBool("isRun", value);
                 _animator.SetBool("Idle", !value);
                 _animator.SetBool("isWalk", !value);
                 _animator.SetBool("IdleAim", !value);
 
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref _turnCalmVelocity, _turnCalmTime);
-                this.transform.rotation = Quaternion.Euler(0.0f, angle, 0.0f);
-
-                Vector3 moveDir = Quaternion.Euler(0.0f, targetAngle, 0.0f) * Vector3.forward;
-                _controller.Move(moveDir.normalized * _playerSprintSpeed * Time.deltaTime);
+                Move(direction, _playerSprintSpeed);
                 _currentSprintSpeed = _playerSprintSpeed;
             } else {
                 _animator.SetBool("Idle", value);
@@ -117,6 +107,16 @@ public class PlayerController : MonoBehaviour
                 _currentSprintSpeed = 0.0f;
             }
         }
+    }
+
+    private void Move(Vector3 direction, float speed)
+    {
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
+        float angle = Mathf.SmoothDampAngle(this.transform.eulerAngles.y, targetAngle, ref _turnCalmVelocity, _turnCalmTime);
+        this.transform.rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+        Vector3 moveDir = Quaternion.Euler(0.0f, targetAngle, 0.0f) * Vector3.forward;
+        _controller.Move(moveDir.normalized * speed * Time.deltaTime);
     }
 
     private void PlayerJump()
@@ -131,5 +131,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
+    public void SetPlayerSpeed(float speed = 0.0f, float sprintSpeed = 0.0f)
+    {
+        this._playerSpeed = speed;
+        this._playerSprintSpeed = sprintSpeed;
+    }
 }
