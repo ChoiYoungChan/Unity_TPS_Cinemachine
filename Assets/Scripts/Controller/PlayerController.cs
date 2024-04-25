@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, ICharacter
 {
     [Header("Health")]
+    [SerializeField] private HealthBar _healthBar;
     [SerializeField] private float _health = 1000.0f;
     [SerializeField] private float _presentHealth = 0.0f;
 
@@ -36,16 +37,24 @@ public class PlayerController : MonoBehaviour
     [Header("Objects")]
     [SerializeField] private Transform _camera;
 
+    [Space(3)]
+    [Header("Sound")]
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip[] _footstepSound;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         _presentHealth = _health;
+        _healthBar.FullHealth(_health);
     }
 
     private void Update()
     {
         SetGravity();
 
+        // I thought about using UniRx, but I left this because there are not many changes in the process.
+        // Possible change to UniRx in subsequent updates
         PlayerMove();
         PlayerJump();
         PlayerSprint();
@@ -98,6 +107,7 @@ public class PlayerController : MonoBehaviour
             float verticalAxis = Input.GetAxis("Vertical");
 
             Vector3 direction = new Vector3(horizontalAxis, 0.0f, verticalAxis).normalized;
+
             var value = direction.magnitude >= 0.1f;
 
             if (value) {
@@ -138,7 +148,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Death()
+    public AudioClip GetRandomFootStep()
+    {
+        return _footstepSound[Random.Range(0, _footstepSound.Length)];
+    }
+
+    public void Step()
+    {
+        AudioClip clip = GetRandomFootStep();
+        _audioSource.PlayOneShot(clip);
+    }
+
+    public void Death()
     {
         Cursor.lockState = CursorLockMode.None;
         Object.Destroy(gameObject);
@@ -147,6 +168,7 @@ public class PlayerController : MonoBehaviour
     public void HitDamage(float damage)
     {
         _presentHealth -= damage;
+        _healthBar.FullHealth(_presentHealth);
         if (_presentHealth <= 0) Death();
     }
 

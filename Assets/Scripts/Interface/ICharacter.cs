@@ -4,7 +4,11 @@ using UnityEngine;
 
 public interface ICharacter
 {
-    void HitDamage(float damage) { }
+    public void HitDamage(float damage);
 
-    void Death() { }
+    public void Death();
+
+    public AudioClip GetRandomFootStep();
+
+    public void Step();
 }

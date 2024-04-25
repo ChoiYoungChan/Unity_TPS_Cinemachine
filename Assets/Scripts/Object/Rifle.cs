@@ -16,8 +16,8 @@ public class Rifle : MonoBehaviour
     [Header("Ammunition and Shooting")]
     [SerializeField] private float _reloadingTime = 0.0f;
     private float _nextTimeShoot = 0.0f;
-    private int _maxAmmo = 20;
-    private int _mag = 15;
+    private int _maxAmmo = 30;
+    private int _mag = 20;
     private int _presentAmmunition;
     private bool _setReloading;
 
@@ -27,9 +27,17 @@ public class Rifle : MonoBehaviour
     [SerializeField] private GameObject _woodedEffect;
     [SerializeField] private GameObject _goreEffect;
 
+    [Space(3)]
+    [Header("Sound")]
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _shootingSound;
+    [SerializeField] private AudioClip _reloadingSound;
+
     private void Awake()
     {
         _presentAmmunition = _maxAmmo;
+        UIManager.Instance.SetAmmoText(_maxAmmo);
+        UIManager.Instance.SetMagText(_mag);
     }
 
     // Update is called once per frame
@@ -55,11 +63,14 @@ public class Rifle : MonoBehaviour
 
         _presentAmmunition--;
 
-        if(_presentAmmunition == 0)
-        {
-            _mag--;
-        }
+        if(_presentAmmunition == 0) _mag--;
+
+        // update UI
+        UIManager.Instance.SetAmmoText(_presentAmmunition);
+        UIManager.Instance.SetMagText(_mag);
+
         _muzzleFlash.Play();
+        _audioSource.PlayOneShot(_shootingSound);
         RaycastHit hit;
 
         if (Physics.Raycast(_cam.transform.position, _cam.transform.forward, out hit, _range))
@@ -120,6 +131,8 @@ public class Rifle : MonoBehaviour
         _setReloading = true;
         Debug.Log("## Reloading");
         _animator.SetBool("Reloading", true);
+        _audioSource.PlayOneShot(_reloadingSound);
+        UIManager.Instance.SetAmmoText(_maxAmmo);
         yield return new WaitForSeconds(_reloadingTime);
         _animator.SetBool("Reloading", false);
         _presentAmmunition = _maxAmmo;

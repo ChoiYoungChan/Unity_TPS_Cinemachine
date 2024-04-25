@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class UIManager : SingletonClass<UIManager>
 {
+    [SerializeField] RifleInfo _rifleInfo;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -14,5 +16,15 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void SetAmmoText(int value)
+    {
+        _rifleInfo.UpdateAmmoText(value);
+    }
+
+    public void SetMagText(int value)
+    {
+        _rifleInfo.UpdateMagText(value);
     }
 }

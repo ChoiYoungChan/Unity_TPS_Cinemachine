@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/FPS Shooting Environment/Scenes/TDM Room.unity
+    path: Assets/FPS Shooting Environment/Scenes/Play.unity
     guid: 7611f361f45dc644ea1a6e2f1cc0a307
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
