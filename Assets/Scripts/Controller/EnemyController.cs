@@ -18,6 +18,11 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private GameObject _shootingRaycastArea;
     [SerializeField] private Transform _playerBody;
     [SerializeField] private LayerMask _playerLayer;
+    [SerializeField] private Transform _spawn;
+    [SerializeField] private Transform _enemyCharacter;
+
+    [Header("Animation and effect")]
+    [SerializeField] private Animator _animator;
 
     [Header("Shoot")]
     [SerializeField] private float _timebtwShoot;
@@ -49,7 +54,12 @@ public class EnemyController : MonoBehaviour
     {
         if(_enemyAgent.SetDestination(_playerBody.position))
         {
-
+            _animator.SetBool("IsRunning", true);
+            _animator.SetBool("IsShooting", false);
+        } else
+        {
+            _animator.SetBool("IsRunning", false);
+            _animator.SetBool("IsShooting", false);
         }
     }
 
@@ -68,6 +78,9 @@ public class EnemyController : MonoBehaviour
                 PlayerController player = hit.transform.GetComponent<PlayerController>();
                 if (player != null) player.HitDamage(_damage);
             }
+
+            _animator.SetBool("IsRunning", false);
+            _animator.SetBool("IsShooting", true);
         }
 
         isPreviouslyShoot = true;
@@ -79,19 +92,46 @@ public class EnemyController : MonoBehaviour
         isPreviouslyShoot = false;
     }
 
-    private void Respawn()
+    private void Death()
     {
+        _animator.SetBool("IsDeath", true);
+        _animator.SetBool("IsRunning", false);
+        _animator.SetBool("IsShooting", false);
+
         _enemyAgent.SetDestination(this.transform.position);
         _speed = 0.0f;
         _shootingRadius = 0.0f;
         _visionRadius = 0.0f;
         _playerInvisionRadius = false;
         _playerInshootingRadius = false;
+
+        Debug.Log("## " + this.transform.name + " Dead ");
+
+        StartCoroutine(Respawn());
+    }
+
+    IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(5.0f);
+        Debug.Log("## Spawn");
+
+        _presentHealth = 120.0f;
+        _speed = 1.0f;
+        _shootingRadius = 10.0f;
+        _visionRadius = 100.0f;
+        _playerInvisionRadius = true;
+        _playerInshootingRadius = false;
+
+        _animator.SetBool("IsDeath", false);
+        _animator.SetBool("IsRunning", true);
+
+        _enemyCharacter.transform.position = _spawn.transform.position;
+        PursuePlayer();
     }
 
     public void HitDamage(float damage)
     {
         _presentHealth -= damage;
-        if (_presentHealth <= 0) Respawn();
+        if (_presentHealth <= 0) Death();
     }
 }

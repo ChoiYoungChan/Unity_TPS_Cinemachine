@@ -25,6 +25,7 @@ public class Rifle : MonoBehaviour
     [Header("Effect")]
     [SerializeField] private ParticleSystem _muzzleFlash;
     [SerializeField] private GameObject _woodedEffect;
+    [SerializeField] private GameObject _goreEffect;
 
     private void Awake()
     {
@@ -65,12 +66,20 @@ public class Rifle : MonoBehaviour
         {
             Debug.Log("## hit info : " + hit.transform.name);
             Objects objects = hit.transform.GetComponent<Objects>();
+            EnemyController enemy = hit.transform.GetComponent<EnemyController>();
 
             if (objects != null)
             {
                 objects.HitDamage(_damage);
                 GameObject woodgo = Instantiate(_woodedEffect, hit.point, Quaternion.LookRotation(hit.normal));
                 Destroy(woodgo, 1.0f);
+            }
+
+            if(enemy != null)
+            {
+                enemy.HitDamage(_damage);
+                GameObject gole = Instantiate(_goreEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                Destroy(gole, 1.0f);
             }
         }
     }
